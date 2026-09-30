@@ -1,0 +1,29 @@
+.hero {
+    --sky-top: #7f9eaf;
+    --sky-middle: #afc6d2;
+    --sky-bottom: #dce9ee;
+    --mountain-back: #9eb5c1;
+    --mountain-front: #19324a;
+    background: radial-gradient(circle at 24% 18%, #ffffff38, transparent 28%), linear-gradient(180deg, var(--sky-top), var(--sky-middle) 48%, var(--sky-bottom));
+}
+.hero[data-weather="sunny"] { --sky-top: #73afd0; --sky-middle: #b2d9e8; --sky-bottom: #e6f0ee; }
+.hero[data-weather="heavy-snow"] { --sky-top: #708995; --sky-middle: #a4b8c2; --sky-bottom: #d6e1e5; }
+.hero[data-time="morning"] { --sky-top: #859eb9; --sky-middle: #dec0b7; --sky-bottom: #f0dfcc; --mountain-back: #b1a9b5; }
+.hero[data-time="night"] { --sky-top: #080f24; --sky-middle: #172a43; --sky-bottom: #33475c; --mountain-back: #263b50; --mountain-front: #102030; }
+.hero::before { background: var(--mountain-back); }
+.hero::after { background: var(--mountain-front); }
+.hero[data-time="night"] h1 { color: #edf3f6; text-shadow: 0 3px 30px #ffffff15; }
+.hero[data-time="night"] .hero-subtitle { color: #bacbd6; }
+.hero[data-time="night"] .eyebrow { color: #e8957f; }
+.weather-layer { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+.weather-snow { position: absolute; top: -24px; left: var(--left); font-size: var(--size); color: white; opacity: var(--opacity); animation: weather-fall var(--duration) linear infinite; animation-delay: var(--delay); }
+.weather-star { position: absolute; left: var(--left); top: var(--top); width: var(--size); height: var(--size); border-radius: 50%; background: #fff; opacity: var(--opacity); animation: weather-twinkle 4s ease-in-out infinite alternate; animation-delay: var(--delay); }
+.weather-stars { display: none; }
+.hero[data-time="night"] .weather-stars { display: block; }
+.hero[data-weather="heavy-snow"] .weather-stars { opacity: .3; }
+@keyframes weather-fall { to { transform: translate(var(--drift), var(--fall-distance)); } }
+@keyframes weather-twinkle { to { opacity: .2; } }
+@media (prefers-reduced-motion: reduce) {
+    .weather-snow, .weather-star { animation: none; }
+    .weather-snow { top: var(--top); }
+}
