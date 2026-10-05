@@ -310,6 +310,40 @@
 
         .section-space { min-height: 135px; }
 
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .skill-group {
+            padding: 24px;
+            border-top: 2px solid var(--vermilion);
+            background: rgba(255, 255, 255, .6);
+        }
+
+        .skill-group h3 {
+            margin: 0 0 12px;
+            color: var(--indigo);
+            font-size: 1.1rem;
+        }
+
+        .skill-group p {
+            margin: 0;
+            color: #60727e;
+            line-height: 1.8;
+        }
+
+        .skill-group ul { margin: 0; padding-left: 1.2em; color: #60727e; line-height: 1.9; }
+        .skill-group li + li { margin-top: 10px; }
+        .skill-group strong { color: var(--indigo); }
+        .skill-group .software-list { list-style: none; padding-left: 0; }
+        .software-list li { display: flex; align-items: flex-start; gap: 12px; }
+        .software-list img { width: 30px; height: 30px; flex-shrink: 0; margin-top: 3px; object-fit: contain; }
+        .skills-source { margin: 24px 0 0; font-size: .85rem; line-height: 1.8; color: #60727e; }
+        .skills-source a { color: var(--indigo); text-underline-offset: 4px; }
+
         .works-section {
             padding-right: clamp(28px, 4vw, 46px);
             padding-left: clamp(28px, 4vw, 46px);
@@ -462,7 +496,7 @@
     <header class="site-header">
         <div class="header-inner">
             <a class="brand" href="#top" aria-label="ページの先頭へ">
-                <span class="brand-jp">藤井 琥珀</span>
+                <span class="brand-jp">藤井 瑚白</span>
                 <span class="brand-en">Fujii Kohaku</span>
             </a>
 
@@ -488,7 +522,7 @@
         <div class="hero-content">
             <p class="eyebrow">Portfolio</p>
             <h1 id="main-title">Fujii Kohaku</h1>
-            <p class="hero-subtitle">Game Programmer / Engine Developer — Niigata</p>
+            <p class="hero-subtitle">Game Programmer / Engine Developer</p>
         </div>
 
         <a class="scroll-guide" href="#about">Scroll</a>
@@ -553,7 +587,37 @@
         <section class="content-section" id="skills">
             <span class="section-number">参 / 03</span>
             <h2>技術<small>Skills</small></h2>
-            <div class="section-space" aria-label="スキルを追加するスペース"></div>
+            <div class="skills-grid">
+                <article class="skill-group">
+                    <h3>使用言語</h3>
+                    <ul>
+                        <li><strong>C++</strong><br>ゲームロジック・自作ゲームエンジンの開発</li>
+                        <li><strong>HLSL</strong><br>シェーダー・ポストエフェクトの実装</li>
+                        <li><strong>Python</strong><br>Blender用レベルエディタのアドオン開発</li>
+                        <li><strong>HTML / CSS / JavaScript</strong><br>Webページ・カウンターアプリの制作</li>
+                    </ul>
+                </article>
+                <article class="skill-group">
+                    <h3>使用ソフト・ツール</h3>
+                    <ul class="software-list">
+                        <li><img src="assets/icons/visualstudio.svg" alt="" width="30" height="30"><span><strong>Visual Studio</strong><br>C++プロジェクトの開発・ビルド</span></li>
+                        <li><img src="assets/icons/vscode.svg" alt="" width="30" height="30"><span><strong>Visual Studio Code</strong><br>コード編集・開発</span></li>
+                        <li><img src="assets/icons/blender.svg" alt="" width="30" height="30"><span><strong>Blender</strong><br>ゲーム用レベルエディタの拡張</span></li>
+                        <li><img src="assets/icons/github.svg" alt="" width="30" height="30"><span><strong>GitHub</strong><br>ソースコードの管理・公開</span></li>
+                    </ul>
+                </article>
+                <article class="skill-group">
+                    <h3>開発技術</h3>
+                    <ul>
+                        <li><strong>DirectX 12</strong><br>自作エンジンの描画処理</li>
+                        <li><strong>グラフィックス</strong><br>Bloom・ぼかし・輪郭線などの画面効果</li>
+                        <li><strong>ゲームシステム</strong><br>プレイヤー・敵・当たり判定・シーン管理</li>
+                    </ul>
+                </article>
+            </div>
+            <p class="skills-source">制作で使用している技術を掲載しています。
+                <a href="https://github.com/FujiiKohaku" target="_blank" rel="noopener noreferrer">GitHubを見る ↗</a>
+            </p>
         </section>
 
         <section class="content-section" id="contact">
