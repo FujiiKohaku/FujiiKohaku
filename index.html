@@ -739,6 +739,68 @@
             .freeze-dialog[open] .freeze-surface, .freeze-dialog.is-shattering { animation: none; }
             .freeze-cracks g { transition: none; }
         }
+
+        .snow-footprints {
+            width: 25px; height: 29px; color: #55788f; opacity: .55;
+            transform: rotate(var(--pawAngle, 0deg));
+            transform-origin: center;
+        }
+        .snow-footprints::before, .snow-footprints::after { content: none; }
+        .snow-footprints svg { display: block; width: 100%; height: 100%; filter: drop-shadow(1px 1px 1px #ffffffa0); }
+        .idle-dog-playground {
+            position: fixed; right: 18px; bottom: 88px; width: 250px; height: 125px;
+            z-index: 8; pointer-events: none;
+        }
+        .idle-dog-playground[hidden] { display: none; }
+        .idle-dog-ground {
+            position: absolute; bottom: 4px; left: 0; right: 0; height: 24px;
+            background: #f5fbffdf; border-radius: 50%; box-shadow: 0 3px 12px #55788f20;
+        }
+        .idle-dog-runner { position: absolute; left: 10px; bottom: 17px; width: 100px; height: 76px; animation: dogChase 5s linear infinite; }
+        .idle-dog-svg { width: 100%; height: 100%; overflow: visible; animation: dogBound 400ms ease-in-out infinite; }
+        .dog-tail { transform-box: fill-box; transform-origin: right center; animation: dogWag 250ms ease-in-out infinite alternate; }
+        .dog-leg { transform-box: fill-box; transform-origin: center top; animation: dogStep 350ms ease-in-out infinite alternate; }
+        .dog-leg-back { animation-delay: -175ms; }
+        .idle-snowball {
+            position: absolute; left: 115px; bottom: 18px; width: 21px; height: 21px;
+            border-radius: 50%; background: radial-gradient(circle at 30% 25%, white, #d2e7f4);
+            border: 1px solid #a5c6d9; animation: snowballRoll 5s linear infinite;
+        }
+        .idle-dog-caption {
+            position: absolute; left: 0; right: 0; top: 0; margin: 0; text-align: center;
+            font-size: .7rem; color: #19324a; background: #f5fbffdc; border-radius: 12px;
+        }
+        .idle-snow-spray {
+            position: absolute; left: 120px; bottom: 20px; color: #b3d6eb;
+            animation: dogSnowSpray 1s ease-out infinite; font-size: 18px;
+        }
+        @keyframes dogChase {
+            0% { transform: translateX(0) scaleX(1); }
+            44%, 48% { transform: translateX(120px) scaleX(1); }
+            50% { transform: translateX(120px) scaleX(-1); }
+            94%, 98% { transform: translateX(0) scaleX(-1); }
+            100% { transform: translateX(0) scaleX(1); }
+        }
+        @keyframes dogBound { 50% { transform: translateY(-8px) rotate(-3deg); } }
+        @keyframes dogWag { from { transform: rotate(-20deg); } to { transform: rotate(25deg); } }
+        @keyframes dogStep { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
+        @keyframes snowballRoll {
+            0% { transform: translateX(0) translateY(0) rotate(0); }
+            25% { transform: translateX(70px) translateY(-14px) rotate(180deg); }
+            45%, 50% { transform: translateX(100px) translateY(0) rotate(360deg); }
+            75% { transform: translateX(-60px) translateY(-12px) rotate(180deg); }
+            95%, 100% { transform: translateX(-100px) translateY(0) rotate(0); }
+        }
+        @keyframes dogSnowSpray {
+            from { opacity: 0; transform: translate(0, 0) scale(.5); }
+            20% { opacity: .9; }
+            to { opacity: 0; transform: translate(40px, -40px) scale(1); }
+        }
+        @media (max-width: 720px) { .idle-dog-playground { right: 12px; bottom: 76px; } }
+        @media (prefers-reduced-motion: reduce) {
+            .idle-dog-playground { display: none; }
+            .idle-dog-playground * { animation: none; }
+        }
     </style>
 <link rel="stylesheet" href="weather.css">
 </head>
@@ -920,6 +982,31 @@
         </div>
         <button class="freeze-melt" type="button">氷を溶かす</button>
     </dialog>
+
+
+    <div class="idle-dog-playground" hidden aria-hidden="true">
+        <p class="idle-dog-caption">雪玉、つかまえた！</p>
+        <div class="idle-dog-ground"></div>
+        <div class="idle-snowball"></div>
+        <span class="idle-snow-spray">❄</span>
+        <div class="idle-dog-runner">
+            <svg class="idle-dog-svg" viewBox="0 0 120 90">
+                <g stroke="#806047" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path class="dog-tail" d="M34 45Q10 42 13 25Q20 26 23 37L35 39" fill="#e7b882"/>
+                    <ellipse cx="55" cy="49" rx="31" ry="21" fill="#f7f0df"/>
+                    <path class="dog-leg dog-leg-back" d="M35 59 31 78Q37 83 44 78L48 59" fill="#e7b882"/>
+                    <path class="dog-leg" d="M65 60 65 79Q72 84 78 78L78 57" fill="#f7f0df"/>
+                    <ellipse cx="83" cy="35" rx="21" ry="22" fill="#f7f0df"/>
+                    <path d="M70 19Q50 16 62 43Q69 50 75 39L78 22" fill="#b77c4b"/>
+                    <path d="M96 34Q115 32 113 45Q107 53 93 49" fill="#f7f0df"/>
+                    <circle cx="92" cy="29" r="3" fill="#29343b" stroke="none"/>
+                    <ellipse cx="111" cy="37" rx="5" ry="4" fill="#29343b" stroke="none"/>
+                    <path d="M100 47Q104 57 109 49" fill="#d58989"/>
+                    <path d="M71 53 91 52" stroke="#a83b32" stroke-width="5"/>
+                </g>
+            </svg>
+        </div>
+    </div>
 
     <footer>
         <small>&copy; 2026 Fujii Kohaku</small>
@@ -1152,6 +1239,11 @@ const kJourneyStorageKey = "fujiiSnowJourneyV1";
 const kMaxFootprints = 12;
 const kFootprintLifetimeMs = 5500;
 const kJourneySnowCount = 16;
+const kPawSpacingPx = 32;
+const kDogPawSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 29" fill="currentColor"><ellipse cx="4" cy="10" rx="3" ry="4" transform="rotate(-25 4 10)"/><ellipse cx="10" cy="5" rx="3" ry="4"/><ellipse cx="17" cy="5" rx="3" ry="4"/><ellipse cx="23" cy="10" rx="2.5" ry="4" transform="rotate(25 23 10)"/><path d="M6 19Q8 12 13 13Q18 12 21 20Q23 27 17 25Q13 23 9 26Q2 27 6 19Z"/></svg>';
+let lastPawClientX = null;
+let lastPawClientY = null;
+let isLeftPaw = true;
 let collectedCrystals = new Set();
 let visitedSections = new Set();
 let journeyStatus = document.querySelector(".journey-status");
@@ -1290,12 +1382,29 @@ function RemoveExpiredFootprint(footprint) {
 }
 
 function LeaveFootprints(event) {
-    if (motionPreference.matches || projectDialog.open || freezeDialog.open || event.button !== 0) {
+    if (motionPreference.matches || projectDialog.open || freezeDialog.open || event.pointerType !== "mouse") {
+        ResetPawTracking();
         return;
     }
-    if (!(event.target instanceof Element) || event.target.closest("a, button, input, textarea, select, [role='button']")) {
+    if (lastPawClientX === null || lastPawClientY === null) {
+        lastPawClientX = event.clientX;
+        lastPawClientY = event.clientY;
         return;
     }
+    let deltaXPx = event.clientX - lastPawClientX;
+    let deltaYPx = event.clientY - lastPawClientY;
+    let distancePx = Math.hypot(deltaXPx, deltaYPx);
+    if (distancePx < kPawSpacingPx) {
+        return;
+    }
+    lastPawClientX = event.clientX;
+    lastPawClientY = event.clientY;
+    let sideOffsetPx = 7;
+    if (isLeftPaw) {
+        sideOffsetPx = -7;
+    }
+    isLeftPaw = !isLeftPaw;
+    let pawAngleDegrees = Math.atan2(deltaYPx, deltaXPx) * 180 / Math.PI + 90;
     let footprints = document.querySelectorAll(".snow-footprints");
     if (footprints.length >= kMaxFootprints) {
         footprints[0].remove();
@@ -1303,12 +1412,20 @@ function LeaveFootprints(event) {
     let footprint = document.createElement("span");
     footprint.className = "snow-footprints";
     footprint.setAttribute("aria-hidden", "true");
-    let leftPx = Math.max(0, Math.min(event.pageX - 16, document.documentElement.clientWidth - 34));
-    footprint.style.left = leftPx + "px";
-    footprint.style.top = Math.max(0, Math.min(event.pageY - 17, document.documentElement.scrollHeight - 36)) + "px";
+    footprint.innerHTML = kDogPawSvg;
+    footprint.style.setProperty("--pawAngle", pawAngleDegrees + "deg");
+    let leftPx = event.pageX - 12 - deltaYPx / distancePx * sideOffsetPx;
+    let topPx = event.pageY - 14 + deltaXPx / distancePx * sideOffsetPx;
+    footprint.style.left = Math.max(0, Math.min(leftPx, document.documentElement.clientWidth - 27)) + "px";
+    footprint.style.top = Math.max(0, Math.min(topPx, document.documentElement.scrollHeight - 31)) + "px";
     footprint.addEventListener("animationend", RemoveFootprints, { once: true });
     document.body.appendChild(footprint);
     window.setTimeout(RemoveExpiredFootprint, kFootprintLifetimeMs, footprint);
+}
+
+function ResetPawTracking() {
+    lastPawClientX = null;
+    lastPawClientY = null;
 }
 
 function HandleJourneyMotion() {
@@ -1361,7 +1478,7 @@ if ("IntersectionObserver" in window) {
         journeyObserver.observe(section);
     }
 }
-document.addEventListener("pointerdown", LeaveFootprints);
+document.addEventListener("pointermove", LeaveFootprints, { passive: true });
 window.addEventListener("scroll", ScheduleSnowJourney, { passive: true });
 window.addEventListener("resize", ScheduleSnowJourney, { passive: true });
 motionPreference.addEventListener("change", HandleJourneyMotion);
@@ -1383,6 +1500,10 @@ function OpenFreezeDialog() {
         return;
     }
     ResetFreezeDialog();
+    ResetPawTracking();
+    for (let footprint of document.querySelectorAll(".snow-footprints")) {
+        footprint.remove();
+    }
     freezeDialog.showModal();
 }
 
@@ -1426,6 +1547,98 @@ snowmanButton.addEventListener("click", OpenFreezeDialog);
 freezeDialog.querySelector(".freeze-hit").addEventListener("click", HitIce);
 freezeDialog.querySelector(".freeze-melt").addEventListener("click", CloseFreezeDialog);
 freezeDialog.addEventListener("close", ResetFreezeDialog);
+</script>
+<script>
+"use strict";
+const kDogIdleDelayMs = 12000;
+let idleDogPlayground = document.querySelector(".idle-dog-playground");
+let lastDogActivityAtMs = performance.now();
+let idleDogTimerId;
+let isDogWindowActive = true;
+
+function StopIdleDog() {
+    idleDogPlayground.hidden = true;
+}
+
+function StartIdleDog() {
+    window.clearTimeout(idleDogTimerId);
+    idleDogTimerId = undefined;
+    if (document.hidden || !isDogWindowActive || motionPreference.matches) {
+        StopIdleDog();
+        return;
+    }
+    let remainingDelayMs = kDogIdleDelayMs - (performance.now() - lastDogActivityAtMs);
+    if (remainingDelayMs > 0) {
+        idleDogTimerId = window.setTimeout(StartIdleDog, remainingDelayMs);
+        return;
+    }
+    if (projectDialog.open || freezeDialog.open) {
+        idleDogTimerId = window.setTimeout(StartIdleDog, kDogIdleDelayMs);
+        return;
+    }
+    idleDogPlayground.hidden = false;
+}
+
+function HandleDogActivity() {
+    lastDogActivityAtMs = performance.now();
+    StopIdleDog();
+    if (!idleDogTimerId && !document.hidden && isDogWindowActive && !motionPreference.matches) {
+        idleDogTimerId = window.setTimeout(StartIdleDog, kDogIdleDelayMs);
+    }
+}
+
+function ResumeDogTimer() {
+    HandleDogActivity();
+    window.clearTimeout(idleDogTimerId);
+    idleDogTimerId = window.setTimeout(StartIdleDog, kDogIdleDelayMs);
+}
+
+function HandleDogVisibility() {
+    ResetPawTracking();
+    if (document.hidden) {
+        window.clearTimeout(idleDogTimerId);
+        StopIdleDog();
+        return;
+    }
+    ResumeDogTimer();
+}
+
+function HandleDogBlur() {
+    isDogWindowActive = false;
+    window.clearTimeout(idleDogTimerId);
+    StopIdleDog();
+    ResetPawTracking();
+}
+
+function HandleDogFocus() {
+    isDogWindowActive = true;
+    ResumeDogTimer();
+}
+
+function HandleDogMotion() {
+    StopIdleDog();
+    ResetPawTracking();
+    window.clearTimeout(idleDogTimerId);
+    if (!motionPreference.matches) {
+        ResumeDogTimer();
+    }
+}
+
+function HandleDogScroll() {
+    ResetPawTracking();
+    HandleDogActivity();
+}
+
+document.addEventListener("pointermove", HandleDogActivity, { passive: true });
+document.addEventListener("pointerdown", HandleDogActivity, { passive: true });
+document.addEventListener("keydown", HandleDogActivity);
+window.addEventListener("scroll", HandleDogScroll, { passive: true });
+window.addEventListener("blur", HandleDogBlur);
+window.addEventListener("focus", HandleDogFocus);
+document.addEventListener("visibilitychange", HandleDogVisibility);
+document.addEventListener("pointerleave", ResetPawTracking);
+motionPreference.addEventListener("change", HandleDogMotion);
+ResumeDogTimer();
 </script>
 </body>
 </html>
