@@ -605,10 +605,89 @@
             .reveal-pending, .reveal-ready { opacity: 1; transform: none; transition: none; }
             .hero::before, .hero::after { transform: none; }
         }
+
+        body { transition: background-color 900ms ease; background: #edf4f7; }
+        body[data-snow-stage="deep"] { background: #d5e3ee; }
+        body[data-snow-stage="night"] { background: #182c43; }
+        .journey-landscape {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+            background: linear-gradient(180deg, #d8eaf2 0%, #f4f8fa 70%);
+            transition: opacity 900ms ease;
+        }
+        .journey-landscape::before {
+            content: ""; position: absolute; inset: 0; opacity: 0;
+            background: radial-gradient(circle at 82% 15%, #f8f5df 0 22px, transparent 23px),
+                radial-gradient(circle at 20% 25%, #fff9 0 1px, transparent 2px),
+                radial-gradient(circle at 65% 38%, #fff9 0 1px, transparent 2px),
+                linear-gradient(180deg, #0d1c32, #36556e);
+            transition: opacity 900ms ease;
+        }
+        body[data-snow-stage="deep"] .journey-landscape { background: linear-gradient(180deg, #9fb9ce, #e8f1f7 75%); }
+        body[data-snow-stage="night"] .journey-landscape::before { opacity: 1; }
+        .journey-landscape::after {
+            content: ""; position: absolute; inset: 60% -10% -10%;
+            background: #ffffff65;
+            clip-path: polygon(0 60%, 20% 20%, 35% 65%, 55% 0, 75% 50%, 90% 15%, 100% 45%, 100% 100%, 0 100%);
+        }
+        .journey-snow { position: absolute; inset: 0; }
+        .journey-snow .ambient-snow { opacity: .3; }
+        body[data-snow-stage="deep"] .journey-snow .ambient-snow { opacity: .65; }
+        .journey-status {
+            position: fixed; bottom: 20px; left: 20px; z-index: 9;
+            max-width: calc(100vw - 100px); padding: 10px 16px; border-radius: 16px;
+            color: var(--indigo); background: rgba(247, 248, 245, .95);
+            border: 1px solid var(--gold); box-shadow: 0 4px 20px #10263a15;
+            font-size: .75rem; line-height: 1.6;
+        }
+        .journey-status span { display: block; }
+        .journey-status.is-complete { border-color: #a83b32; background: #fff8e6; }
+        .snow-footprints {
+            position: absolute; width: 32px; height: 34px; pointer-events: none; z-index: 2;
+            animation: coverFootprints 5500ms ease-out forwards;
+        }
+        .snow-footprints::before, .snow-footprints::after {
+            content: ""; position: absolute; width: 10px; height: 20px;
+            border-radius: 60% 60% 40% 40%; background: #6c8da24d;
+            box-shadow: inset 1px 2px 4px #19324a35, 1px 1px 2px white;
+            transform: rotate(-15deg);
+        }
+        .snow-footprints::after { left: 19px; top: 10px; transform: rotate(15deg); }
+        @keyframes coverFootprints { 0%, 25% { opacity: .8; } 100% { opacity: 0; } }
+        .project-image-placeholder { position: relative; overflow: hidden; }
+        .card-snow-cover {
+            position: absolute; inset: 0; display: grid; place-content: center; gap: 8px;
+            background: linear-gradient(160deg, #fff, #e7eff3 65%, #c7dbe5);
+            color: var(--indigo); text-align: center; font-size: .7rem; letter-spacing: .12em;
+            transition: transform 700ms cubic-bezier(.16, 1, .3, 1), opacity 600ms ease;
+            pointer-events: none;
+        }
+        .card-snow-cover b { font-size: 2rem; color: #7094ad; }
+        .project-card.is-uncovered .card-snow-cover { transform: translateY(105%) rotate(5deg); opacity: 0; }
+        .project-card.is-collected .project-card-body::after {
+            content: "❄ 結晶を見つけました"; display: block; margin-top: 8px;
+            font-family: "Yu Gothic", sans-serif; font-size: .65rem; color: #557b96;
+        }
+        .snowman-button svg { display: block; width: 100%; height: 100%; }
+        .snowman-scarf, .snowman-hat { opacity: 0; transition: opacity 450ms ease; }
+        .snowman-button[data-growth="scarf"] .snowman-scarf,
+        .snowman-button[data-growth="hat"] .snowman-scarf,
+        .snowman-button[data-growth="hat"] .snowman-hat { opacity: 1; }
+        .snowman-button[data-growth="hat"] { box-shadow: 0 0 24px #b79a6270; }
+        @media (max-width: 720px) {
+            .journey-status { bottom: 12px; left: 12px; padding: 8px 10px; font-size: .65rem; }
+            .journey-snow .ambient-snow:nth-child(n + 9) { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .journey-landscape, .journey-landscape::before, .card-snow-cover,
+            .snowman-scarf, .snowman-hat { transition: none; }
+            .snow-footprints { display: none; }
+        }
     </style>
 <link rel="stylesheet" href="weather.css">
 </head>
 <body>
+    <div class="journey-landscape" aria-hidden="true"><div class="journey-snow"></div></div>
+    <div class="journey-status"><span id="snowStageLabel">薄雪の小道</span><span id="crystalStatus" role="status" aria-live="polite" aria-atomic="true">❄ 雪の結晶 0 / 6</span></div>
     <header class="site-header">
         <div class="header-inner">
             <a class="brand" href="#top" aria-label="ページの先頭へ">
@@ -753,7 +832,13 @@
         </div>
     </dialog>
 
-    <button class="snowman-button" type="button" aria-label="雪だるまと遊ぶ" title="クリックして雪だるまと遊ぶ"><img src="assets/snowman.svg" alt="" width="50" height="50"></button>
+    <button class="snowman-button" type="button" aria-label="雪だるまと遊ぶ" title="クリックして雪だるまと遊ぶ"><svg viewBox="0 0 64 64" aria-hidden="true">
+<circle cx="32" cy="44" r="16" fill="#f7f8f5"/><circle cx="32" cy="23" r="12" fill="#f7f8f5"/>
+<circle cx="28" cy="22" r="1.8" fill="#19324a"/><circle cx="37" cy="22" r="1.8" fill="#19324a"/>
+<path d="m32 25 9 3-9 2z" fill="#ed8b3b"/><circle cx="32" cy="43" r="2" fill="#19324a"/><circle cx="32" cy="51" r="2" fill="#19324a"/>
+<g class="snowman-scarf"><path d="M22 31h20v6H22zM37 35h6v12h-6z" fill="#a83b32"/></g>
+<g class="snowman-hat"><path d="M21 14h22M25 13V5h14v8" fill="#10263a" stroke="#b79a62" stroke-width="2"/></g>
+</svg></button>
 
     <footer>
         <small>&copy; 2026 Fujii Kohaku</small>
@@ -774,6 +859,9 @@ function OpenProjectDialog(event) {
     projectDialogImage.replaceChildren();
     if (projectImage) {
         projectDialogImage.appendChild(projectImage.cloneNode(true));
+    }
+    for (let snowCover of projectDialogImage.querySelectorAll(".card-snow-cover")) {
+        snowCover.remove();
     }
     projectDialogTitle.textContent = projectCard.querySelector("h3").textContent;
     projectDialogSummary.textContent = projectCard.querySelector("p").textContent;
@@ -976,6 +1064,228 @@ snowmanButton.addEventListener("click", PlaySnowman);
 snowmanButton.addEventListener("animationend", ResetSnowman);
 motionPreference.addEventListener("change", HandleMotionPreference);
 UpdateMountains();
+</script>
+<script>
+"use strict";
+const kJourneyStorageKey = "fujiiSnowJourneyV1";
+const kMaxFootprints = 12;
+const kFootprintLifetimeMs = 5500;
+const kJourneySnowCount = 16;
+let collectedCrystals = new Set();
+let visitedSections = new Set();
+let journeyStatus = document.querySelector(".journey-status");
+let crystalStatus = document.getElementById("crystalStatus");
+let snowStageLabel = document.getElementById("snowStageLabel");
+let journeySnow = document.querySelector(".journey-snow");
+let isJourneyFramePending = false;
+let journeyObserver;
+
+function RestoreJourney() {
+    try {
+        let savedJourney = JSON.parse(localStorage.getItem(kJourneyStorageKey));
+        if (savedJourney && Array.isArray(savedJourney.crystals)) {
+            for (let crystalIndex of savedJourney.crystals) {
+                if (Number.isInteger(crystalIndex) && crystalIndex >= 0 && crystalIndex < projectCards.length) {
+                    collectedCrystals.add(crystalIndex);
+                }
+            }
+        }
+        if (savedJourney && Array.isArray(savedJourney.sections)) {
+            for (let sectionId of savedJourney.sections) {
+                if (["about", "skills", "works", "contact"].includes(sectionId)) {
+                    visitedSections.add(sectionId);
+                }
+            }
+        }
+    } catch (error) {
+        collectedCrystals.clear();
+        visitedSections.clear();
+    }
+}
+
+function SaveJourney() {
+    try {
+        localStorage.setItem(kJourneyStorageKey, JSON.stringify({
+            crystals: Array.from(collectedCrystals), sections: Array.from(visitedSections)
+        }));
+    } catch (error) {
+        // Keep the current visit usable when storage is unavailable.
+    }
+}
+
+function UpdateJourneyStatus() {
+    let count = collectedCrystals.size;
+    crystalStatus.textContent = "❄ 雪の結晶 " + count + " / " + projectCards.length;
+    let growth = "plain";
+    let growthDescription = "雪だるま：作品を見ると育ちます";
+    if (visitedSections.size >= 2 || count >= 1) {
+        growth = "scarf";
+        growthDescription = "雪だるま：マフラーを見つけました";
+    }
+    if (visitedSections.size >= 4 || count >= 3) {
+        growth = "hat";
+        growthDescription = "雪だるま：帽子も見つけました";
+    }
+    snowmanButton.dataset.growth = growth;
+    snowmanButton.title = growthDescription + "。クリックで遊ぶ";
+    snowmanButton.setAttribute("aria-label", growthDescription + "。クリックで遊ぶ");
+    if (count === projectCards.length && count > 0) {
+        journeyStatus.classList.add("is-complete");
+        crystalStatus.textContent = "❄ 全ての結晶を発見！ 雪の旅、達成";
+    }
+}
+
+function RevealCardSnow(event) {
+    event.currentTarget.classList.add("is-uncovered");
+}
+
+function CollectCrystal(event) {
+    let projectCard = event.currentTarget;
+    let crystalIndex = Number(projectCard.dataset.crystalIndex);
+    projectCard.classList.add("is-uncovered", "is-collected");
+    if (!collectedCrystals.has(crystalIndex)) {
+        collectedCrystals.add(crystalIndex);
+        SaveJourney();
+        UpdateJourneyStatus();
+        if (collectedCrystals.size === projectCards.length) {
+            PlaySnowman();
+        }
+    }
+}
+
+function HandleCrystalKeydown(event) {
+    if (event.key === "Enter" || event.key === " ") {
+        CollectCrystal(event);
+    }
+}
+
+function ObserveJourneySections(entries) {
+    for (let entry of entries) {
+        if (entry.isIntersecting) {
+            visitedSections.add(entry.target.id);
+            journeyObserver.unobserve(entry.target);
+            SaveJourney();
+            UpdateJourneyStatus();
+        }
+    }
+}
+
+function UpdateSnowJourney() {
+    isJourneyFramePending = false;
+    let scrollRangePx = document.documentElement.scrollHeight - window.innerHeight;
+    let progress = 0;
+    if (scrollRangePx > 0) {
+        progress = Math.max(0, Math.min(1, window.scrollY / scrollRangePx));
+    }
+    let snowStage = "light";
+    let stageLabel = "薄雪の小道";
+    if (progress >= .3) {
+        snowStage = "deep";
+        stageLabel = "深い雪の森";
+    }
+    if (progress >= .72) {
+        snowStage = "night";
+        stageLabel = "静かな雪の夜";
+    }
+    if (document.body.dataset.snowStage !== snowStage) {
+        document.body.dataset.snowStage = snowStage;
+        snowStageLabel.textContent = stageLabel;
+    }
+}
+
+function ScheduleSnowJourney() {
+    if (!isJourneyFramePending) {
+        isJourneyFramePending = true;
+        requestAnimationFrame(UpdateSnowJourney);
+    }
+}
+
+function RemoveFootprints(event) {
+    event.currentTarget.remove();
+}
+
+function RemoveExpiredFootprint(footprint) {
+    footprint.remove();
+}
+
+function LeaveFootprints(event) {
+    if (motionPreference.matches || projectDialog.open || event.button !== 0) {
+        return;
+    }
+    if (!(event.target instanceof Element) || event.target.closest("a, button, input, textarea, select, [role='button']")) {
+        return;
+    }
+    let footprints = document.querySelectorAll(".snow-footprints");
+    if (footprints.length >= kMaxFootprints) {
+        footprints[0].remove();
+    }
+    let footprint = document.createElement("span");
+    footprint.className = "snow-footprints";
+    footprint.setAttribute("aria-hidden", "true");
+    let leftPx = Math.max(0, Math.min(event.pageX - 16, document.documentElement.clientWidth - 34));
+    footprint.style.left = leftPx + "px";
+    footprint.style.top = Math.max(0, Math.min(event.pageY - 17, document.documentElement.scrollHeight - 36)) + "px";
+    footprint.addEventListener("animationend", RemoveFootprints, { once: true });
+    document.body.appendChild(footprint);
+    window.setTimeout(RemoveExpiredFootprint, kFootprintLifetimeMs, footprint);
+}
+
+function HandleJourneyMotion() {
+    if (motionPreference.matches) {
+        for (let footprint of document.querySelectorAll(".snow-footprints")) {
+            footprint.remove();
+        }
+    }
+}
+
+RestoreJourney();
+let crystalIndex = 0;
+for (let projectCard of projectCards) {
+    projectCard.dataset.crystalIndex = String(crystalIndex);
+    let image = projectCard.querySelector(".project-image-placeholder");
+    if (image) {
+        let cover = document.createElement("span");
+        cover.className = "card-snow-cover";
+        cover.setAttribute("aria-hidden", "true");
+        let crystal = document.createElement("b");
+        crystal.textContent = "❄";
+        let hint = document.createElement("span");
+        hint.textContent = "触れて雪を払う";
+        cover.append(crystal, hint);
+        image.appendChild(cover);
+    }
+    if (collectedCrystals.has(crystalIndex)) {
+        projectCard.classList.add("is-uncovered", "is-collected");
+    }
+    projectCard.addEventListener("pointerenter", RevealCardSnow);
+    projectCard.addEventListener("focus", RevealCardSnow);
+    projectCard.addEventListener("pointerdown", RevealCardSnow);
+    projectCard.addEventListener("click", CollectCrystal);
+    projectCard.addEventListener("keydown", HandleCrystalKeydown);
+    crystalIndex++;
+}
+for (let snowIndex = 0; snowIndex < kJourneySnowCount; snowIndex++) {
+    let flake = document.createElement("span");
+    flake.className = "ambient-snow";
+    flake.style.setProperty("--snowLeft", Math.random() * 100 + "%");
+    flake.style.setProperty("--snowSize", 2 + Math.random() * 4 + "px");
+    flake.style.setProperty("--snowDuration", 16 + Math.random() * 12 + "s");
+    flake.style.setProperty("--snowDelay", -Math.random() * 25 + "s");
+    flake.style.setProperty("--snowOpacity", ".4");
+    journeySnow.appendChild(flake);
+}
+if ("IntersectionObserver" in window) {
+    journeyObserver = new IntersectionObserver(ObserveJourneySections, { threshold: .15 });
+    for (let section of document.querySelectorAll(".content-section")) {
+        journeyObserver.observe(section);
+    }
+}
+document.addEventListener("pointerdown", LeaveFootprints);
+window.addEventListener("scroll", ScheduleSnowJourney, { passive: true });
+window.addEventListener("resize", ScheduleSnowJourney, { passive: true });
+motionPreference.addEventListener("change", HandleJourneyMotion);
+UpdateJourneyStatus();
+UpdateSnowJourney();
 </script>
 </body>
 </html>
