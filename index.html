@@ -410,6 +410,41 @@
             font-style: italic;
         }
 
+
+        .project-card[role="button"] { cursor: pointer; }
+        .project-card:focus-visible { outline: 3px solid var(--vermilion); outline-offset: 4px; }
+        body:has(.project-dialog[open]) { overflow: hidden; }
+        .project-dialog {
+            width: min(820px, calc(100% - 32px));
+            max-height: calc(100dvh - 32px);
+            padding: 0;
+            color: var(--ink);
+            background: var(--snow);
+            border: 1px solid var(--gold);
+            box-shadow: 0 24px 80px rgba(16, 38, 58, .35);
+        }
+        .project-dialog::backdrop { background: rgba(16, 38, 58, .72); }
+        .project-dialog-header { display: flex; justify-content: flex-end; padding: 12px 16px; }
+        .project-dialog-close {
+            padding: 8px 16px;
+            color: white;
+            background: var(--indigo);
+            border: 0;
+            font: inherit;
+            cursor: pointer;
+        }
+        .project-dialog-close:focus-visible { outline: 3px solid var(--vermilion); outline-offset: 3px; }
+        .project-dialog-image .project-image-placeholder { font-size: 1rem; }
+        .project-dialog-image img { display: block; width: 100%; height: auto; object-fit: contain; }
+        .project-dialog-content { padding: 24px clamp(20px, 5vw, 40px) 32px; }
+        .project-dialog-content h3 {
+            margin: 0 0 8px;
+            color: var(--indigo);
+            font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+        .project-dialog-content p { margin: 0; color: #60727e; }
+
         footer {
             padding: 30px 20px;
             color: rgba(255, 255, 255, .7);
@@ -631,10 +666,80 @@
         </section>
     </main>
 
+
+    <dialog class="project-dialog" id="projectDialog" aria-labelledby="projectDialogTitle" aria-describedby="projectDialogSummary">
+        <div class="project-dialog-header">
+            <button class="project-dialog-close" type="button" autofocus>閉じる ×</button>
+        </div>
+        <div class="project-dialog-image" id="projectDialogImage"></div>
+        <div class="project-dialog-content">
+            <h3 id="projectDialogTitle"></h3>
+            <p id="projectDialogSummary"></p>
+        </div>
+    </dialog>
+
     <footer>
         <small>&copy; 2026 Fujii Kohaku</small>
     </footer>
 <script src="weather.js"></script>
+<script>
+"use strict";
+
+let projectDialog = document.getElementById("projectDialog");
+let projectDialogImage = document.getElementById("projectDialogImage");
+let projectDialogTitle = document.getElementById("projectDialogTitle");
+let projectDialogSummary = document.getElementById("projectDialogSummary");
+let projectCards = document.querySelectorAll(".project-card");
+
+function OpenProjectDialog(event) {
+    let projectCard = event.currentTarget;
+    let projectImage = projectCard.querySelector(".project-image-placeholder, img");
+    projectDialogImage.replaceChildren();
+    if (projectImage) {
+        projectDialogImage.appendChild(projectImage.cloneNode(true));
+    }
+    projectDialogTitle.textContent = projectCard.querySelector("h3").textContent;
+    projectDialogSummary.textContent = projectCard.querySelector("p").textContent;
+    projectDialog.showModal();
+}
+
+function HandleProjectKeydown(event) {
+    if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        OpenProjectDialog(event);
+    }
+}
+
+function CloseProjectDialog() {
+    projectDialog.close();
+}
+
+function HandleProjectBackdropClick(event) {
+    if (event.target !== projectDialog) {
+        return;
+    }
+    let dialogBounds = projectDialog.getBoundingClientRect();
+    let isOutsideDialog = event.clientX < dialogBounds.left ||
+        event.clientX > dialogBounds.right ||
+        event.clientY < dialogBounds.top ||
+        event.clientY > dialogBounds.bottom;
+    if (isOutsideDialog) {
+        CloseProjectDialog();
+    }
+}
+
+for (let projectCard of projectCards) {
+    projectCard.setAttribute("role", "button");
+    projectCard.setAttribute("tabindex", "0");
+    projectCard.setAttribute("aria-haspopup", "dialog");
+    projectCard.setAttribute("aria-controls", "projectDialog");
+    projectCard.setAttribute("aria-label", projectCard.querySelector("h3").textContent + "を拡大表示");
+    projectCard.addEventListener("click", OpenProjectDialog);
+    projectCard.addEventListener("keydown", HandleProjectKeydown);
+}
+projectDialog.querySelector(".project-dialog-close").addEventListener("click", CloseProjectDialog);
+projectDialog.addEventListener("click", HandleProjectBackdropClick);
+</script>
 </body>
 </html>
 
