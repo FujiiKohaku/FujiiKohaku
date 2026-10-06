@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>雪だるま</title>
+  <rect width="64" height="64" rx="14" fill="#19324a"/>
+  <path d="M17 40 7 33M47 40l10-7" fill="none" stroke="#b79a62" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="44" r="16" fill="#f7f8f5"/>
+  <circle cx="32" cy="23" r="12" fill="#f7f8f5"/>
+  <path d="M22 31h20v6H22zM37 35h6v12h-6z" fill="#a83b32"/>
+  <path d="M21 14h22M25 13V5h14v8" fill="#10263a" stroke="#b79a62" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="28" cy="22" r="1.8" fill="#19324a"/>
+  <circle cx="37" cy="22" r="1.8" fill="#19324a"/>
+  <path d="m32 25 9 3-9 2z" fill="#ed8b3b"/>
+  <circle cx="32" cy="43" r="2" fill="#19324a"/>
+  <circle cx="32" cy="51" r="2" fill="#19324a"/>
+</svg>
