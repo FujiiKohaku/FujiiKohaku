@@ -542,6 +542,69 @@
             html { scroll-behavior: auto; }
             .snowflake, .scroll-guide::after { animation: none; }
         }
+
+        .hero { --mountainOffset: 0px; }
+        .hero::before { transform: translateY(var(--mountainOffset)); }
+        .hero::after { transform: translateY(calc(var(--mountainOffset) * .5)); }
+        .snow-scene { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+        .hero[data-weather="sunny"] .snow-scene { display: none; }
+        .hero[data-weather="heavy-snow"] .ambient-snow { animation-duration: calc(var(--snowDuration) * .7); }
+        .ambient-snow {
+            position: absolute; left: var(--snowLeft); top: -30px;
+            width: var(--snowSize); height: var(--snowSize); border-radius: 50%;
+            background: white; opacity: var(--snowOpacity);
+            animation: ambientSnowfall var(--snowDuration) linear var(--snowDelay) infinite;
+        }
+        @keyframes ambientSnowfall {
+            0% { transform: translate3d(0, -30px, 0); }
+            35% { transform: translate3d(28px, 38vh, 0); }
+            70% { transform: translate3d(-14px, 76vh, 0); }
+            100% { transform: translate3d(38px, 115vh, 0); }
+        }
+        .reveal-pending { opacity: 0; transform: translateY(24px); }
+        .reveal-ready {
+            opacity: 1; transform: translateY(0);
+            transition: opacity 650ms ease-out, transform 650ms cubic-bezier(.16, 1, .3, 1);
+            transition-delay: var(--revealDelay, 0ms);
+        }
+        .project-card { position: relative; }
+        .project-card::after {
+            position: absolute; inset: 0; content: ""; pointer-events: none;
+            background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .42) 50%, transparent 70%);
+            transform: translateX(-140%);
+        }
+        @media (hover: hover) {
+            .project-card:hover::after { animation: cardShine 800ms ease-out; }
+        }
+        .project-card:focus-visible::after { animation: cardShine 800ms ease-out; }
+        @keyframes cardShine { to { transform: translateX(140%); } }
+        .project-dialog[open] { animation: none; }
+        .snowman-button {
+            position: fixed; right: 20px; bottom: 20px; z-index: 11;
+            width: 60px; height: 60px; padding: 5px; border: 1px solid var(--gold);
+            border-radius: 50%; background: var(--indigo); cursor: pointer;
+            box-shadow: 0 6px 22px rgba(16, 38, 58, .22);
+        }
+        .snowman-button img { display: block; width: 100%; height: 100%; }
+        .snowman-button:focus-visible { outline: 3px solid var(--vermilion); outline-offset: 4px; }
+        .snowman-button.is-happy { animation: snowmanHop 550ms cubic-bezier(.22, 1, .36, 1); }
+        @keyframes snowmanHop {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            35% { transform: translateY(-25px) rotate(-12deg); }
+            65% { transform: translateY(-8px) rotate(10deg); }
+        }
+        .snow-burst { position: fixed; width: 7px; height: 7px; border-radius: 50%; background: #e7eff3; border: 1px solid #9eb5c1; pointer-events: none; z-index: 12; }
+        @media (max-width: 720px) {
+            .snowman-button { width: 48px; height: 48px; right: 12px; bottom: 12px; }
+            .ambient-snow:nth-child(n + 13) { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .ambient-snow, .snowman-button.is-happy, .project-card:hover::after,
+            .project-card:focus-visible::after { animation: none; }
+            .ambient-snow { display: none; }
+            .reveal-pending, .reveal-ready { opacity: 1; transform: none; transition: none; }
+            .hero::before, .hero::after { transform: none; }
+        }
     </style>
 <link rel="stylesheet" href="weather.css">
 </head>
@@ -565,12 +628,7 @@
     </header>
 
     <section class="hero" id="top" aria-labelledby="main-title">
-        <span class="snowflake" aria-hidden="true">◆</span>
-        <span class="snowflake" aria-hidden="true">❄</span>
-        <span class="snowflake" aria-hidden="true">◆</span>
-        <span class="snowflake" aria-hidden="true">❄</span>
-        <span class="snowflake" aria-hidden="true">◆</span>
-        <span class="snowflake" aria-hidden="true">❄</span>
+        <div class="snow-scene" aria-hidden="true"></div>
 
         <div class="hero-content">
             <p class="eyebrow">Portfolio</p>
@@ -695,6 +753,8 @@
         </div>
     </dialog>
 
+    <button class="snowman-button" type="button" aria-label="雪だるまと遊ぶ" title="クリックして雪だるまと遊ぶ"><img src="assets/snowman.svg" alt="" width="50" height="50"></button>
+
     <footer>
         <small>&copy; 2026 Fujii Kohaku</small>
     </footer>
@@ -717,7 +777,19 @@ function OpenProjectDialog(event) {
     }
     projectDialogTitle.textContent = projectCard.querySelector("h3").textContent;
     projectDialogSummary.textContent = projectCard.querySelector("p").textContent;
+    let cardBounds = projectCard.getBoundingClientRect();
     projectDialog.showModal();
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        let dialogBounds = projectDialog.getBoundingClientRect();
+        let offsetXPx = cardBounds.left + cardBounds.width / 2 - dialogBounds.left - dialogBounds.width / 2;
+        let offsetYPx = cardBounds.top + cardBounds.height / 2 - dialogBounds.top - dialogBounds.height / 2;
+        let scaleX = cardBounds.width / dialogBounds.width;
+        let scaleY = cardBounds.height / dialogBounds.height;
+        projectDialog.animate([
+            { transform: "translate(" + offsetXPx + "px, " + offsetYPx + "px) scale(" + scaleX + ", " + scaleY + ")", opacity: .3 },
+            { transform: "translate(0, 0) scale(1)", opacity: 1 }
+        ], { duration: kDialogDurationMs, easing: "cubic-bezier(.16, 1, .3, 1)" });
+    }
 }
 
 function HandleProjectKeydown(event) {
@@ -756,6 +828,154 @@ for (let projectCard of projectCards) {
 }
 projectDialog.querySelector(".project-dialog-close").addEventListener("click", CloseProjectDialog);
 projectDialog.addEventListener("click", HandleProjectBackdropClick);
+</script>
+<script>
+"use strict";
+
+const kSnowCount = 24;
+const kBurstCount = 10;
+const kDialogDurationMs = 360;
+let motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+let hero = document.querySelector(".hero");
+let snowScene = document.querySelector(".snow-scene");
+let snowmanButton = document.querySelector(".snowman-button");
+let revealObserver;
+let isScrollFramePending = false;
+
+function CreateSnow() {
+    let previousSnowLayer = hero.querySelector(".weather-snowfall");
+    if (previousSnowLayer) {
+        previousSnowLayer.remove();
+    }
+    for (let snowIndex = 0; snowIndex < kSnowCount; snowIndex++) {
+        let snowflake = document.createElement("span");
+        let isForeground = snowIndex % 3 === 0;
+        let sizePx = 3 + Math.random() * 3;
+        let durationSeconds = 18 + Math.random() * 10;
+        let opacity = .35;
+        if (isForeground) {
+            sizePx = 6 + Math.random() * 4;
+            durationSeconds = 10 + Math.random() * 6;
+            opacity = .75;
+        }
+        snowflake.className = "ambient-snow";
+        snowflake.style.setProperty("--snowLeft", Math.random() * 100 + "%");
+        snowflake.style.setProperty("--snowSize", sizePx + "px");
+        snowflake.style.setProperty("--snowDuration", durationSeconds + "s");
+        snowflake.style.setProperty("--snowDelay", -Math.random() * durationSeconds + "s");
+        snowflake.style.setProperty("--snowOpacity", String(opacity));
+        snowScene.appendChild(snowflake);
+    }
+}
+
+function RevealEntries(entries) {
+    for (let entry of entries) {
+        if (entry.isIntersecting) {
+            entry.target.classList.remove("reveal-pending");
+            entry.target.classList.add("reveal-ready");
+            revealObserver.unobserve(entry.target);
+        }
+    }
+}
+
+function InitializeReveals() {
+    if (motionPreference.matches || !("IntersectionObserver" in window)) {
+        return;
+    }
+    revealObserver = new IntersectionObserver(RevealEntries, { threshold: .08 });
+    let sections = document.querySelectorAll(".content-section");
+    for (let section of sections) {
+        section.classList.add("reveal-pending");
+        revealObserver.observe(section);
+    }
+    let skillGroups = document.querySelectorAll(".skill-group");
+    let groupIndex = 0;
+    for (let skillGroup of skillGroups) {
+        skillGroup.style.setProperty("--revealDelay", groupIndex * 100 + "ms");
+        skillGroup.classList.add("reveal-pending");
+        revealObserver.observe(skillGroup);
+        groupIndex++;
+    }
+}
+
+function UpdateMountains() {
+    isScrollFramePending = false;
+    if (motionPreference.matches || window.innerWidth <= 720) {
+        hero.style.setProperty("--mountainOffset", "0px");
+        return;
+    }
+    let heroBounds = hero.getBoundingClientRect();
+    if (heroBounds.bottom > 0 && heroBounds.top < window.innerHeight) {
+        let offsetPx = Math.min(Math.max(-heroBounds.top, 0) * .12, 90);
+        hero.style.setProperty("--mountainOffset", offsetPx + "px");
+    }
+}
+
+function ScheduleMountainUpdate() {
+    if (!isScrollFramePending) {
+        isScrollFramePending = true;
+        window.requestAnimationFrame(UpdateMountains);
+    }
+}
+
+function RemoveBurst(event) {
+    event.currentTarget.effect.target.remove();
+}
+
+function ResetSnowman() {
+    snowmanButton.classList.remove("is-happy");
+}
+
+function PlaySnowman() {
+    if (motionPreference.matches || snowmanButton.classList.contains("is-happy")) {
+        return;
+    }
+    snowmanButton.classList.add("is-happy");
+    let buttonBounds = snowmanButton.getBoundingClientRect();
+    for (let burstIndex = 0; burstIndex < kBurstCount; burstIndex++) {
+        let snowParticle = document.createElement("span");
+        snowParticle.className = "snow-burst";
+        snowParticle.setAttribute("aria-hidden", "true");
+        snowParticle.style.left = buttonBounds.left + buttonBounds.width / 2 + "px";
+        snowParticle.style.top = buttonBounds.top + buttonBounds.height / 2 + "px";
+        document.body.appendChild(snowParticle);
+        let angleRadians = Math.PI + Math.PI * burstIndex / (kBurstCount - 1);
+        let distancePx = 45 + Math.random() * 35;
+        let burstAnimation = snowParticle.animate([
+            { transform: "translate(0, 0) scale(1)", opacity: 1 },
+            { transform: "translate(" + Math.cos(angleRadians) * distancePx + "px, " + (Math.sin(angleRadians) * distancePx - 20) + "px) scale(.3)", opacity: 0 }
+        ], { duration: 650, easing: "cubic-bezier(.16, 1, .3, 1)" });
+        burstAnimation.addEventListener("finish", RemoveBurst, { once: true });
+    }
+}
+
+function HandleMotionPreference() {
+    UpdateMountains();
+    if (motionPreference.matches) {
+        if (revealObserver) {
+            revealObserver.disconnect();
+        }
+        for (let element of document.querySelectorAll(".reveal-pending")) {
+            element.classList.remove("reveal-pending");
+        }
+        ResetSnowman();
+        for (let particle of document.querySelectorAll(".snow-burst")) {
+            particle.remove();
+        }
+        for (let animation of projectDialog.getAnimations()) {
+            animation.cancel();
+        }
+    }
+}
+
+CreateSnow();
+InitializeReveals();
+window.addEventListener("scroll", ScheduleMountainUpdate, { passive: true });
+window.addEventListener("resize", ScheduleMountainUpdate, { passive: true });
+snowmanButton.addEventListener("click", PlaySnowman);
+snowmanButton.addEventListener("animationend", ResetSnowman);
+motionPreference.addEventListener("change", HandleMotionPreference);
+UpdateMountains();
 </script>
 </body>
 </html>
