@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+<defs><linearGradient id="sky" x2="1" y2="1"><stop stop-color="#263650"/><stop offset="1" stop-color="#7c819f"/></linearGradient></defs>
+<path fill="url(#sky)" d="M0 0h1280v720H0z"/>
+<g fill="none" stroke="#e4dff01c" stroke-width="2"><circle cx="640" cy="340" r="270"/><circle cx="640" cy="340" r="320"/><path d="M0 600 1280 160M0 660 1280 220"/></g>
+<rect x="480" y="218" width="320" height="190" rx="16" fill="none" stroke="#e4dff070" stroke-width="2"/>
+<path d="m510 370 68-72 49 44 72-83 73 111z" fill="#e4dff030"/>
+<circle cx="739" cy="270" r="15" fill="#e4dff070"/>
+<text x="640" y="470" text-anchor="middle" fill="#f3f0f9" font-family="sans-serif" font-size="20" letter-spacing="5">SCREENSHOT 02</text>
+<text x="640" y="509" text-anchor="middle" fill="#ddd5ec" font-family="sans-serif" font-size="17">作品スクリーンショット準備中</text>
+</svg>
