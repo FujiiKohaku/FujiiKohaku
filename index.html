@@ -1175,9 +1175,14 @@ const kFootprintLifetimeMs = 5500;
 const kPawFadeDurationMs = 650;
 const kJourneySnowCount = 16;
 const kPawSpacingPx = 32;
+const kAnimalStepIntervalMs = 480;
+const kAnimalWalkMarginPx = 40;
 const kDogPawSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 29" fill="currentColor"><ellipse cx="4" cy="10" rx="3" ry="4" transform="rotate(-25 4 10)"/><ellipse cx="10" cy="5" rx="3" ry="4"/><ellipse cx="17" cy="5" rx="3" ry="4"/><ellipse cx="23" cy="10" rx="2.5" ry="4" transform="rotate(25 23 10)"/><path d="M6 19Q8 12 13 13Q18 12 21 20Q23 27 17 25Q13 23 9 26Q2 27 6 19Z"/></svg>';
-let lastPawClientX = null;
-let lastPawClientY = null;
+let animalXPx = null;
+let animalYPx = null;
+let animalHeadingRadians = 0;
+let animalStepCount = 0;
+let animalWalkTimerId;
 let isLeftPaw = true;
 let collectedCrystals = new Set();
 let visitedSections = new Set();
@@ -1329,24 +1334,7 @@ function RemoveExpiredFootprint(footprint) {
     FadeFootprint(footprint);
 }
 
-function LeaveFootprints(event) {
-    if (motionPreference.matches || projectDialog.open || freezeDialog.open || event.pointerType !== "mouse") {
-        ResetPawTracking();
-        return;
-    }
-    if (lastPawClientX === null || lastPawClientY === null) {
-        lastPawClientX = event.clientX;
-        lastPawClientY = event.clientY;
-        return;
-    }
-    let deltaXPx = event.clientX - lastPawClientX;
-    let deltaYPx = event.clientY - lastPawClientY;
-    let distancePx = Math.hypot(deltaXPx, deltaYPx);
-    if (distancePx < kPawSpacingPx) {
-        return;
-    }
-    lastPawClientX = event.clientX;
-    lastPawClientY = event.clientY;
+function LeaveFootprints(deltaXPx, deltaYPx) {
     let sideOffsetPx = 7;
     if (isLeftPaw) {
         sideOffsetPx = -7;
@@ -1366,17 +1354,70 @@ function LeaveFootprints(event) {
     footprint.setAttribute("aria-hidden", "true");
     footprint.innerHTML = kDogPawSvg;
     footprint.style.setProperty("--pawAngle", pawAngleDegrees + "deg");
-    let leftPx = event.pageX - 12 - deltaYPx / distancePx * sideOffsetPx;
-    let topPx = event.pageY - 14 + deltaXPx / distancePx * sideOffsetPx;
+    let leftPx = animalXPx - 12 - deltaYPx / kPawSpacingPx * sideOffsetPx;
+    let topPx = animalYPx - 14 + deltaXPx / kPawSpacingPx * sideOffsetPx;
     footprint.style.left = Math.max(0, Math.min(leftPx, document.documentElement.clientWidth - 27)) + "px";
     footprint.style.top = Math.max(0, Math.min(topPx, document.documentElement.scrollHeight - 31)) + "px";
     document.body.appendChild(footprint);
     window.setTimeout(RemoveExpiredFootprint, kFootprintLifetimeMs - kPawFadeDurationMs, footprint);
 }
 
-function ResetPawTracking() {
-    lastPawClientX = null;
-    lastPawClientY = null;
+function ResetAnimalWalk() {
+    animalXPx = null;
+    animalYPx = null;
+    animalStepCount = 0;
+    isLeftPaw = true;
+}
+
+function CanAnimalWalk() {
+    return !document.hidden && !motionPreference.matches && !projectDialog.open && !freezeDialog.open;
+}
+
+function WalkAnimal() {
+    animalWalkTimerId = undefined;
+    if (!CanAnimalWalk()) {
+        return;
+    }
+    let leftBoundaryPx = kAnimalWalkMarginPx;
+    let rightBoundaryPx = document.documentElement.clientWidth - kAnimalWalkMarginPx;
+    let topBoundaryPx = window.scrollY + kAnimalWalkMarginPx;
+    let bottomBoundaryPx = window.scrollY + window.innerHeight - kAnimalWalkMarginPx;
+    if (rightBoundaryPx <= leftBoundaryPx || bottomBoundaryPx <= topBoundaryPx) {
+        return;
+    }
+    if (animalXPx === null || animalYPx === null || animalXPx < leftBoundaryPx ||
+        animalXPx > rightBoundaryPx || animalYPx < topBoundaryPx || animalYPx > bottomBoundaryPx) {
+        ResetAnimalWalk();
+        animalXPx = leftBoundaryPx + Math.random() * (rightBoundaryPx - leftBoundaryPx);
+        animalYPx = topBoundaryPx + Math.random() * (bottomBoundaryPx - topBoundaryPx);
+        animalHeadingRadians = Math.random() * Math.PI * 2;
+    }
+    animalHeadingRadians += Math.sin(animalStepCount * .35) * .12;
+    let deltaXPx = Math.cos(animalHeadingRadians) * kPawSpacingPx;
+    let deltaYPx = Math.sin(animalHeadingRadians) * kPawSpacingPx;
+    if (animalXPx + deltaXPx < leftBoundaryPx || animalXPx + deltaXPx > rightBoundaryPx) {
+        animalHeadingRadians = Math.PI - animalHeadingRadians;
+        deltaXPx = -deltaXPx;
+    }
+    if (animalYPx + deltaYPx < topBoundaryPx || animalYPx + deltaYPx > bottomBoundaryPx) {
+        animalHeadingRadians = -animalHeadingRadians;
+        deltaYPx = -deltaYPx;
+    }
+    animalXPx = Math.max(leftBoundaryPx, Math.min(rightBoundaryPx, animalXPx + deltaXPx));
+    animalYPx = Math.max(topBoundaryPx, Math.min(bottomBoundaryPx, animalYPx + deltaYPx));
+    LeaveFootprints(deltaXPx, deltaYPx);
+    animalStepCount++;
+    animalWalkTimerId = window.setTimeout(WalkAnimal, kAnimalStepIntervalMs);
+}
+
+function UpdateAnimalWalkState() {
+    window.clearTimeout(animalWalkTimerId);
+    animalWalkTimerId = undefined;
+    if (CanAnimalWalk()) {
+        animalWalkTimerId = window.setTimeout(WalkAnimal, kAnimalStepIntervalMs);
+    } else {
+        ResetAnimalWalk();
+    }
 }
 
 function HandleJourneyMotion() {
@@ -1429,7 +1470,6 @@ if ("IntersectionObserver" in window) {
         journeyObserver.observe(section);
     }
 }
-document.addEventListener("pointermove", LeaveFootprints, { passive: true });
 window.addEventListener("scroll", ScheduleSnowJourney, { passive: true });
 window.addEventListener("resize", ScheduleSnowJourney, { passive: true });
 motionPreference.addEventListener("change", HandleJourneyMotion);
@@ -1451,7 +1491,7 @@ function OpenFreezeDialog() {
         return;
     }
     ResetFreezeDialog();
-    ResetPawTracking();
+    ResetAnimalWalk();
     for (let footprint of document.querySelectorAll(".snow-footprints")) {
         footprint.remove();
     }
@@ -1565,12 +1605,14 @@ function ClearSnowPuffsForMotion() {
 }
 
 document.addEventListener("click", PlaySnowPuff);
-window.addEventListener("scroll", ResetPawTracking, { passive: true });
-window.addEventListener("blur", ResetPawTracking);
-document.addEventListener("pointerleave", ResetPawTracking);
-document.addEventListener("visibilitychange", ResetPawTracking);
-motionPreference.addEventListener("change", ResetPawTracking);
+window.addEventListener("resize", UpdateAnimalWalkState, { passive: true });
+document.addEventListener("visibilitychange", UpdateAnimalWalkState);
+motionPreference.addEventListener("change", UpdateAnimalWalkState);
 motionPreference.addEventListener("change", ClearSnowPuffsForMotion);
+let animalDialogObserver = new MutationObserver(UpdateAnimalWalkState);
+animalDialogObserver.observe(projectDialog, { attributes: true, attributeFilter: ["open"] });
+animalDialogObserver.observe(freezeDialog, { attributes: true, attributeFilter: ["open"] });
+UpdateAnimalWalkState();
 </script>
 </body>
 </html>
