@@ -1,7 +1,7 @@
 "use strict";
 
 const kEntryStorageKey = "fujiiPortfolioEntrySeenV1";
-const kEntryFallbackDurationMs = 1800;
+const kEntryFallbackDurationMs = 2200;
 let entryIntro = document.getElementById("entryIntro");
 let entryMotionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
 let entryColorPreference = window.matchMedia("(forced-colors: active)");

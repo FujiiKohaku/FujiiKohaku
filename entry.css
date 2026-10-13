@@ -6,51 +6,122 @@
     place-items: center;
     overflow: hidden;
     color: #f7f8f5;
-    background: radial-gradient(ellipse at 50% 48%, #19324a, #10263a 58%, #0b1a29);
-    animation: EntryVeilDissolve 1600ms ease-in-out both;
+    background: radial-gradient(ellipse at 50% 38%, #203c50, #10263a 52%, #081622);
+    animation: EntryVeilDissolve 2000ms cubic-bezier(.45, 0, .3, 1) both;
 }
-
 .entry-intro[hidden] { display: none; }
-
+.entry-frame {
+    position: absolute;
+    inset: 28px;
+    border: 1px solid #b79a6226;
+    pointer-events: none;
+}
+.entry-frame::before, .entry-frame::after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border-color: #b79a6280;
+    border-style: solid;
+}
+.entry-frame::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; }
+.entry-frame::after { bottom: -1px; right: -1px; border-width: 0 1px 1px 0; }
+.entry-corner {
+    position: absolute;
+    z-index: 1;
+    right: 56px;
+    left: 56px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #d0dee7a6;
+    font-size: .58rem;
+    letter-spacing: .18em;
+    line-height: 1.8;
+    animation: EntryDetailsAppear 1600ms ease both;
+}
+.entry-corner-top { top: 52px; }
+.entry-corner-top > span:first-child { color: #f7f8f5; font-size: 1rem; letter-spacing: .05em; }
+.entry-corner-bottom { bottom: 52px; }
+.entry-corner-bottom > span:last-child { display: flex; align-items: center; }
+.entry-corner-dot { display: inline-block; width: 4px; height: 4px; margin: 0 0 3px 7px; border-radius: 50%; background: #b79a62; }
+.entry-corner-divider { width: 36px; height: 1px; margin: 0 14px; background: #b79a6273; }
+.entry-landscape {
+    position: absolute;
+    inset: 38% -5% -6%;
+    background: url("assets/entry-landscape.svg") center bottom / cover no-repeat;
+    animation: EntryLandscapeAppear 2000ms ease-out both;
+}
+.entry-background-name {
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    margin: 0;
+    color: transparent;
+    font-family: "Yu Mincho", "Times New Roman", serif;
+    font-size: clamp(6rem, 22vw, 23rem);
+    font-weight: 400;
+    letter-spacing: .05em;
+    line-height: 1;
+    white-space: nowrap;
+    -webkit-text-stroke: 1px #e7eff30e;
+    transform: translateX(-50%);
+}
 .entry-signature {
     position: relative;
+    z-index: 1;
     padding: 24px;
     text-align: center;
-    animation: EntrySignatureAppear 1250ms cubic-bezier(.22, 1, .36, 1) both;
+    transform: translateY(-18px);
 }
-
+.entry-emblem {
+    display: block;
+    margin: 0 auto 26px;
+    fill: none;
+    stroke: #b79a62;
+    stroke-width: 1;
+    animation: EntryEmblemAppear 1700ms ease both;
+}
+.entry-emblem > path:first-child { stroke-opacity: .45; }
+.entry-emblem circle { fill: #b79a62; stroke: none; }
 .entry-caption {
-    margin: 0 0 24px;
-    padding-left: .38em;
+    margin: 0 0 16px;
+    padding-left: .3em;
     color: #b79a62;
-    font-size: .58rem;
-    letter-spacing: .38em;
+    font-size: .55rem;
+    letter-spacing: .3em;
+    animation: EntrySignatureAppear 1650ms cubic-bezier(.22, 1, .36, 1) both;
 }
-
 .entry-name {
     margin: 0;
-    padding-left: .16em;
+    padding-left: .14em;
     font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
-    font-size: clamp(2.6rem, 7vw, 4.8rem);
+    font-size: clamp(2.8rem, 7vw, 5.4rem);
     font-weight: 400;
-    letter-spacing: .16em;
+    letter-spacing: .14em;
     line-height: 1.5;
+    text-shadow: 0 2px 28px #08162260;
+    animation: EntrySignatureAppear 1650ms 80ms cubic-bezier(.22, 1, .36, 1) both;
 }
-
 .entry-name span { margin-left: .4em; }
-
-.entry-romanization {
-    margin: 20px 0 0;
-    padding-left: .32em;
-    color: #e7eff3b3;
-    font-size: .62rem;
-    letter-spacing: .32em;
+.entry-rule {
+    width: 40px;
+    height: 1px;
+    margin: 25px auto 20px;
+    background: #b79a62;
+    animation: EntryRuleDraw 1650ms 140ms ease both;
 }
-
+.entry-romanization {
+    margin: 0;
+    padding-left: .38em;
+    color: #e7eff3b3;
+    font-size: .6rem;
+    letter-spacing: .38em;
+    animation: EntrySignatureAppear 1650ms 160ms cubic-bezier(.22, 1, .36, 1) both;
+}
 .entry-snow {
     position: absolute;
     inset: -15%;
-    opacity: .5;
     background:
         radial-gradient(circle at 22% 24%, #e7eff3b3 0 1px, transparent 2px),
         radial-gradient(circle at 76% 20%, #e7eff380 0 1.5px, transparent 3px),
@@ -58,27 +129,53 @@
         radial-gradient(circle at 84% 64%, #e7eff399 0 1px, transparent 2px),
         radial-gradient(circle at 12% 60%, #e7eff366 0 1.5px, transparent 3px),
         radial-gradient(circle at 62% 82%, #e7eff380 0 1px, transparent 2px);
-    animation: EntrySnowDrift 1600ms ease-out both;
+    animation: EntrySnowDrift 2000ms ease-out both;
 }
-
 @keyframes EntrySignatureAppear {
-    0% { opacity: 0; transform: translateY(12px); filter: blur(6px); }
-    38%, 76% { opacity: 1; transform: translateY(0); filter: blur(0); }
-    100% { opacity: 0; transform: translateY(-5px); filter: blur(3px); }
+    0% { opacity: 0; transform: translateY(16px); filter: blur(5px); }
+    32%, 80% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
 }
-
 @keyframes EntryVeilDissolve {
-    0%, 65% { opacity: 1; }
+    0%, 70% { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
 }
-
 @keyframes EntrySnowDrift {
-    from { opacity: 0; transform: translateY(-12px); }
+    from { opacity: 0; transform: translateY(-14px); }
     40% { opacity: .5; }
     to { opacity: 0; transform: translateY(30px); }
 }
-
+@keyframes EntryLandscapeAppear {
+    from { opacity: 0; transform: translateY(18px); }
+    45%, 100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes EntryEmblemAppear {
+    0% { opacity: 0; transform: scale(.85) rotate(-15deg); }
+    35%, 80% { opacity: 1; transform: scale(1) rotate(0); }
+    100% { opacity: 0; transform: scale(1.05) rotate(0); }
+}
+@keyframes EntryRuleDraw {
+    0% { opacity: 0; transform: scaleX(0); }
+    40%, 80% { opacity: 1; transform: scaleX(1); }
+    100% { opacity: 0; transform: scaleX(1.4); }
+}
+@keyframes EntryDetailsAppear {
+    0% { opacity: 0; }
+    40%, 80% { opacity: 1; }
+    100% { opacity: 0; }
+}
+@media (max-width: 600px) {
+    .entry-frame { inset: 16px; }
+    .entry-corner { right: 32px; left: 32px; font-size: .48rem; letter-spacing: .1em; }
+    .entry-corner-top { top: 34px; }
+    .entry-corner-bottom { bottom: 34px; align-items: flex-end; }
+    .entry-corner-divider { width: 16px; margin: 0 8px; }
+    .entry-background-name { bottom: 16%; font-size: 26vw; }
+    .entry-landscape { inset: 45% -35% -3%; }
+    .entry-emblem { width: 40px; height: 40px; margin-bottom: 24px; }
+    .entry-caption { font-size: .5rem; }
+}
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
     .entry-intro { display: none; animation: none; }
-    .entry-signature, .entry-snow { animation: none; }
+    .entry-intro * { animation: none; }
 }

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="600" viewBox="0 0 1600 600" fill="none">
+  <defs>
+    <linearGradient id="distantSnow" x1="800" y1="120" x2="800" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#7597b0" stop-opacity=".18"/><stop offset="1" stop-color="#10263a" stop-opacity="0"/></linearGradient>
+    <linearGradient id="nearSnow" x1="800" y1="300" x2="800" y2="600" gradientUnits="userSpaceOnUse"><stop stop-color="#7a9eb5" stop-opacity=".12"/><stop offset="1" stop-color="#0b1a29" stop-opacity="0"/></linearGradient>
+  </defs>
+  <path d="m0 340 150-130 100 75L420 120l170 195 155-100 180 130 140-200 130 130 120-90 185 135v280H0Z" fill="url(#distantSnow)"/>
+  <path d="m0 340 150-130 100 75L420 120l170 195 155-100 180 130 140-200 130 130 120-90 185 135" stroke="#9eb9cb" stroke-opacity=".22"/>
+  <path d="m0 470 245-150 190 100 200-80 230 145 205-200 180 155 120-75 230 145v90H0Z" fill="url(#nearSnow)"/>
+  <path d="m0 470 245-150 190 100 200-80 230 145 205-200 180 155 120-75 230 145" stroke="#9eb9cb" stroke-opacity=".1"/>
+  <path d="m360 180 60-60 64 73-49-28-18-26-20 27Z" fill="#d4e1e9" fill-opacity=".09"/>
+</svg>
