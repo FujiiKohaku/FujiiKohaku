@@ -1177,12 +1177,21 @@ const kJourneySnowCount = 16;
 const kPawSpacingPx = 32;
 const kAnimalStepIntervalMs = 480;
 const kAnimalWalkMarginPx = 40;
+const kAnimalFootprintClearancePx = 30;
+const kAnimalDirectionAttempts = 12;
+const kAnimalStartAttempts = 40;
+const kAnimalTrackSteps = 32;
 const kDogPawSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 29" fill="currentColor"><ellipse cx="4" cy="10" rx="3" ry="4" transform="rotate(-25 4 10)"/><ellipse cx="10" cy="5" rx="3" ry="4"/><ellipse cx="17" cy="5" rx="3" ry="4"/><ellipse cx="23" cy="10" rx="2.5" ry="4" transform="rotate(25 23 10)"/><path d="M6 19Q8 12 13 13Q18 12 21 20Q23 27 17 25Q13 23 9 26Q2 27 6 19Z"/></svg>';
+const kDeerHoofSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 29" fill="currentColor"><path d="M11 2C6 5 3 13 4 20C4 24 7 25 11 23Z"/><path d="M14 2C19 5 22 13 21 20C21 24 18 25 14 23Z"/><ellipse cx="7" cy="27" rx="2" ry="1.5"/><ellipse cx="18" cy="27" rx="2" ry="1.5"/></svg>';
+const kAnimalFootprintSvgs = [kDogPawSvg, kDeerHoofSvg];
 let animalXPx = null;
 let animalYPx = null;
 let animalHeadingRadians = 0;
 let animalStepCount = 0;
 let animalWalkTimerId;
+let animalFootprintIndex = 1;
+let animalObstacles = [];
+let isAnimalLayoutDirty = true;
 let isLeftPaw = true;
 let collectedCrystals = new Set();
 let visitedSections = new Set();
@@ -1352,7 +1361,7 @@ function LeaveFootprints(deltaXPx, deltaYPx) {
     let footprint = document.createElement("span");
     footprint.className = "snow-footprints";
     footprint.setAttribute("aria-hidden", "true");
-    footprint.innerHTML = kDogPawSvg;
+    footprint.innerHTML = kAnimalFootprintSvgs[animalFootprintIndex];
     footprint.style.setProperty("--pawAngle", pawAngleDegrees + "deg");
     let leftPx = animalXPx - 12 - deltaYPx / kPawSpacingPx * sideOffsetPx;
     let topPx = animalYPx - 14 + deltaXPx / kPawSpacingPx * sideOffsetPx;
@@ -1367,6 +1376,75 @@ function ResetAnimalWalk() {
     animalYPx = null;
     animalStepCount = 0;
     isLeftPaw = true;
+    animalFootprintIndex = (animalFootprintIndex + 1) % kAnimalFootprintSvgs.length;
+}
+
+function MarkAnimalLayoutDirty() {
+    isAnimalLayoutDirty = true;
+}
+
+function AddAnimalObstacle(rectangle) {
+    if (rectangle.width <= 0 || rectangle.height <= 0 || rectangle.bottom < 0 ||
+        rectangle.top > window.innerHeight) {
+        return;
+    }
+    animalObstacles.push({
+        left: rectangle.left - kAnimalFootprintClearancePx,
+        right: rectangle.right + kAnimalFootprintClearancePx,
+        top: rectangle.top - kAnimalFootprintClearancePx,
+        bottom: rectangle.bottom + kAnimalFootprintClearancePx
+    });
+}
+
+function RefreshAnimalObstacles() {
+    if (!isAnimalLayoutDirty) {
+        return;
+    }
+    isAnimalLayoutDirty = false;
+    animalObstacles = [];
+    let textWalker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let textNode = textWalker.nextNode();
+    let textRange = document.createRange();
+    while (textNode) {
+        let parentElement = textNode.parentElement;
+        if (textNode.textContent.trim() && parentElement &&
+            !parentElement.closest('script, style, svg, dialog, [aria-hidden="true"]') &&
+            getComputedStyle(parentElement).visibility !== "hidden") {
+            textRange.selectNodeContents(textNode);
+            for (let rectangle of textRange.getClientRects()) {
+                AddAnimalObstacle(rectangle);
+            }
+        }
+        textNode = textWalker.nextNode();
+    }
+    for (let element of document.querySelectorAll('a, button, input, select, textarea, .project-card, .journey-status')) {
+        if (!element.closest("dialog")) {
+            AddAnimalObstacle(element.getBoundingClientRect());
+        }
+    }
+    // Remove old tracks when scrolling or layout changes bring content over them.
+    for (let footprint of document.querySelectorAll(".snow-footprints")) {
+        let rectangle = footprint.getBoundingClientRect();
+        let centerXPx = (rectangle.left + rectangle.right) / 2;
+        let centerYPx = (rectangle.top + rectangle.bottom) / 2 + window.scrollY;
+        if (!IsAnimalPathClear(centerXPx, centerYPx, centerXPx, centerYPx)) {
+            footprint.remove();
+        }
+    }
+}
+
+function IsAnimalPathClear(startXPx, startYPx, endXPx, endYPx) {
+    let leftPx = Math.min(startXPx, endXPx);
+    let rightPx = Math.max(startXPx, endXPx);
+    let topPx = Math.min(startYPx, endYPx) - window.scrollY;
+    let bottomPx = Math.max(startYPx, endYPx) - window.scrollY;
+    for (let obstacle of animalObstacles) {
+        if (leftPx < obstacle.right && rightPx > obstacle.left &&
+            topPx < obstacle.bottom && bottomPx > obstacle.top) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function CanAnimalWalk() {
@@ -1378,6 +1456,8 @@ function WalkAnimal() {
     if (!CanAnimalWalk()) {
         return;
     }
+    RefreshAnimalObstacles();
+    animalWalkTimerId = window.setTimeout(WalkAnimal, kAnimalStepIntervalMs);
     let leftBoundaryPx = kAnimalWalkMarginPx;
     let rightBoundaryPx = document.documentElement.clientWidth - kAnimalWalkMarginPx;
     let topBoundaryPx = window.scrollY + kAnimalWalkMarginPx;
@@ -1385,32 +1465,50 @@ function WalkAnimal() {
     if (rightBoundaryPx <= leftBoundaryPx || bottomBoundaryPx <= topBoundaryPx) {
         return;
     }
-    if (animalXPx === null || animalYPx === null || animalXPx < leftBoundaryPx ||
-        animalXPx > rightBoundaryPx || animalYPx < topBoundaryPx || animalYPx > bottomBoundaryPx) {
+    if (animalXPx === null || animalYPx === null || animalStepCount >= kAnimalTrackSteps ||
+        animalXPx < leftBoundaryPx || animalXPx > rightBoundaryPx || animalYPx < topBoundaryPx ||
+        animalYPx > bottomBoundaryPx || !IsAnimalPathClear(animalXPx, animalYPx, animalXPx, animalYPx)) {
         ResetAnimalWalk();
-        animalXPx = leftBoundaryPx + Math.random() * (rightBoundaryPx - leftBoundaryPx);
-        animalYPx = topBoundaryPx + Math.random() * (bottomBoundaryPx - topBoundaryPx);
+        for (let attemptIndex = 0; attemptIndex < kAnimalStartAttempts; attemptIndex++) {
+            let startXPx = leftBoundaryPx + Math.random() * (rightBoundaryPx - leftBoundaryPx);
+            let startYPx = topBoundaryPx + Math.random() * (bottomBoundaryPx - topBoundaryPx);
+            if (IsAnimalPathClear(startXPx, startYPx, startXPx, startYPx)) {
+                animalXPx = startXPx;
+                animalYPx = startYPx;
+                break;
+            }
+        }
+        if (animalXPx === null) {
+            return;
+        }
         animalHeadingRadians = Math.random() * Math.PI * 2;
     }
     animalHeadingRadians += Math.sin(animalStepCount * .35) * .12;
-    let deltaXPx = Math.cos(animalHeadingRadians) * kPawSpacingPx;
-    let deltaYPx = Math.sin(animalHeadingRadians) * kPawSpacingPx;
-    if (animalXPx + deltaXPx < leftBoundaryPx || animalXPx + deltaXPx > rightBoundaryPx) {
-        animalHeadingRadians = Math.PI - animalHeadingRadians;
-        deltaXPx = -deltaXPx;
+    for (let attemptIndex = 0; attemptIndex < kAnimalDirectionAttempts; attemptIndex++) {
+        let turnRadians = Math.ceil(attemptIndex / 2) * Math.PI / 6;
+        if (attemptIndex % 2 === 0) {
+            turnRadians = -turnRadians;
+        }
+        let candidateHeadingRadians = animalHeadingRadians + turnRadians;
+        let deltaXPx = Math.cos(candidateHeadingRadians) * kPawSpacingPx;
+        let deltaYPx = Math.sin(candidateHeadingRadians) * kPawSpacingPx;
+        let nextXPx = animalXPx + deltaXPx;
+        let nextYPx = animalYPx + deltaYPx;
+        if (nextXPx >= leftBoundaryPx && nextXPx <= rightBoundaryPx && nextYPx >= topBoundaryPx &&
+            nextYPx <= bottomBoundaryPx && IsAnimalPathClear(animalXPx, animalYPx, nextXPx, nextYPx)) {
+            animalHeadingRadians = candidateHeadingRadians;
+            animalXPx = nextXPx;
+            animalYPx = nextYPx;
+            LeaveFootprints(deltaXPx, deltaYPx);
+            animalStepCount++;
+            return;
+        }
     }
-    if (animalYPx + deltaYPx < topBoundaryPx || animalYPx + deltaYPx > bottomBoundaryPx) {
-        animalHeadingRadians = -animalHeadingRadians;
-        deltaYPx = -deltaYPx;
-    }
-    animalXPx = Math.max(leftBoundaryPx, Math.min(rightBoundaryPx, animalXPx + deltaXPx));
-    animalYPx = Math.max(topBoundaryPx, Math.min(bottomBoundaryPx, animalYPx + deltaYPx));
-    LeaveFootprints(deltaXPx, deltaYPx);
-    animalStepCount++;
-    animalWalkTimerId = window.setTimeout(WalkAnimal, kAnimalStepIntervalMs);
+    ResetAnimalWalk();
 }
 
 function UpdateAnimalWalkState() {
+    MarkAnimalLayoutDirty();
     window.clearTimeout(animalWalkTimerId);
     animalWalkTimerId = undefined;
     if (CanAnimalWalk()) {
@@ -1605,6 +1703,8 @@ function ClearSnowPuffsForMotion() {
 }
 
 document.addEventListener("click", PlaySnowPuff);
+window.addEventListener("scroll", MarkAnimalLayoutDirty, { passive: true });
+document.addEventListener("transitionend", MarkAnimalLayoutDirty);
 window.addEventListener("resize", UpdateAnimalWalkState, { passive: true });
 document.addEventListener("visibilitychange", UpdateAnimalWalkState);
 motionPreference.addEventListener("change", UpdateAnimalWalkState);
@@ -1612,6 +1712,11 @@ motionPreference.addEventListener("change", ClearSnowPuffsForMotion);
 let animalDialogObserver = new MutationObserver(UpdateAnimalWalkState);
 animalDialogObserver.observe(projectDialog, { attributes: true, attributeFilter: ["open"] });
 animalDialogObserver.observe(freezeDialog, { attributes: true, attributeFilter: ["open"] });
+if ("ResizeObserver" in window) {
+    let animalLayoutObserver = new ResizeObserver(MarkAnimalLayoutDirty);
+    animalLayoutObserver.observe(document.body);
+}
+document.fonts.addEventListener("loadingdone", MarkAnimalLayoutDirty);
 UpdateAnimalWalkState();
 </script>
 </body>
