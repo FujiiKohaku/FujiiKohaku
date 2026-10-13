@@ -787,6 +787,7 @@
         @media (prefers-reduced-motion: reduce) { .snow-puff { display: none; } }
     </style>
 <link rel="stylesheet" href="weather.css">
+<link rel="stylesheet" href="gallery.css">
 </head>
 <body>
     <div class="journey-landscape" aria-hidden="true"><div class="journey-snow"></div></div>
@@ -809,13 +810,34 @@
         </div>
     </header>
 
-    <section class="hero" id="top" aria-labelledby="main-title">
+    <section class="hero" id="top" aria-labelledby="galleryTitle">
         <div class="snow-scene" aria-hidden="true"></div>
 
-        <div class="hero-content">
-            <p class="eyebrow">Portfolio</p>
-            <h1 id="main-title">Fujii Kohaku</h1>
-            <p class="hero-subtitle">Game Programmer / Engine Developer</p>
+        <div class="hero-gallery" id="workGallery" role="region" aria-roledescription="カルーセル" aria-label="制作作品のギャラリー">
+            <h1 class="gallery-title" id="galleryTitle">Selected Works</h1>
+            <div class="gallery-viewport">
+                <ul class="gallery-track" id="galleryTrack">
+                    <li class="gallery-slide" aria-label="作品 1 / 3">
+                        <img src="assets/gallery/work-01.svg" alt="作品1のスクリーンショット用仮画像" width="1280" height="720" fetchpriority="high">
+                        <span class="gallery-caption">作品 01</span>
+                    </li>
+                    <li class="gallery-slide" aria-label="作品 2 / 3">
+                        <img src="assets/gallery/work-02.svg" alt="作品2のスクリーンショット用仮画像" width="1280" height="720" decoding="async">
+                        <span class="gallery-caption">作品 02</span>
+                    </li>
+                    <li class="gallery-slide" aria-label="作品 3 / 3">
+                        <img src="assets/gallery/work-03.svg" alt="作品3のスクリーンショット用仮画像" width="1280" height="720" decoding="async">
+                        <span class="gallery-caption">作品 03</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="gallery-controls">
+                <button type="button" id="galleryPrevious" aria-label="前の作品" aria-controls="galleryTrack">←</button>
+                <span class="gallery-counter" id="galleryCounter">01 / 03</span>
+                <button type="button" id="galleryNext" aria-label="次の作品" aria-controls="galleryTrack">→</button>
+                <button type="button" class="gallery-playback" id="galleryPlayback" aria-pressed="false">一時停止</button>
+            </div>
+            <span class="gallery-announcement" id="galleryAnnouncement" role="status" aria-live="polite"></span>
         </div>
 
         <a class="scroll-guide" href="#about">Scroll</a>
@@ -1443,7 +1465,7 @@ function RefreshAnimalObstacles() {
         }
         textNode = textWalker.nextNode();
     }
-    for (let element of document.querySelectorAll('a, button, input, select, textarea, .project-card, .journey-status')) {
+    for (let element of document.querySelectorAll('a, button, input, select, textarea, .project-card, .journey-status, .hero-gallery, .gallery-slide')) {
         if (!element.closest("dialog")) {
             AddAnimalObstacle(element.getBoundingClientRect());
         }
@@ -1745,6 +1767,7 @@ if ("ResizeObserver" in window) {
 document.fonts.addEventListener("loadingdone", MarkAnimalLayoutDirty);
 UpdateAnimalWalkState();
 </script>
+<script src="gallery.js"></script>
 </body>
 </html>
 
