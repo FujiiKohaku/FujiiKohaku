@@ -77,13 +77,15 @@
 .entry-emblem {
     display: block;
     margin: 0 auto 26px;
-    fill: none;
-    stroke: #b79a62;
-    stroke-width: 1;
     animation: EntryEmblemAppear 1700ms ease both;
 }
-.entry-emblem > path:first-child { stroke-opacity: .45; }
-.entry-emblem circle { fill: #b79a62; stroke: none; }
+.entry-crystal {
+    position: absolute;
+    opacity: .3;
+    animation: EntryCrystalDrift 2000ms ease-out both;
+}
+.entry-crystal-left { top: 34%; left: 17%; transform: rotate(-12deg); }
+.entry-crystal-right { top: 62%; right: 18%; transform: rotate(18deg); }
 .entry-caption {
     margin: 0 0 16px;
     padding-left: .3em;
@@ -164,6 +166,11 @@
     40%, 80% { opacity: 1; }
     100% { opacity: 0; }
 }
+@keyframes EntryCrystalDrift {
+    0% { opacity: 0; translate: 0 -12px; }
+    35%, 75% { opacity: .3; }
+    100% { opacity: 0; translate: 0 12px; }
+}
 @media (max-width: 600px) {
     .entry-frame { inset: 16px; }
     .entry-corner { right: 32px; left: 32px; font-size: .48rem; letter-spacing: .1em; }
@@ -172,7 +179,9 @@
     .entry-corner-divider { width: 16px; margin: 0 8px; }
     .entry-background-name { bottom: 16%; font-size: 26vw; }
     .entry-landscape { inset: 45% -35% -3%; }
-    .entry-emblem { width: 40px; height: 40px; margin-bottom: 24px; }
+    .entry-emblem { width: 56px; height: 56px; margin-bottom: 24px; }
+    .entry-crystal-left { top: 25%; left: 14%; width: 40px; height: 40px; }
+    .entry-crystal-right { top: 66%; right: 12%; width: 32px; height: 32px; }
     .entry-caption { font-size: .5rem; }
 }
 @media (prefers-reduced-motion: reduce), (forced-colors: active) {
