@@ -25,6 +25,32 @@
             scroll-padding-top: calc(var(--header-height) + 20px);
         }
 
+        @media (forced-colors: none) {
+            html {
+                scrollbar-color: #55788f var(--snow-blue);
+                scrollbar-width: thin;
+            }
+
+            @supports selector(html::-webkit-scrollbar) {
+                html {
+                    scrollbar-color: auto;
+                    scrollbar-width: auto;
+                }
+
+                html::-webkit-scrollbar { width: 12px; height: 12px; }
+                html::-webkit-scrollbar-track { background: var(--snow-blue); }
+                html::-webkit-scrollbar-thumb {
+                    background: #55788f;
+                    border: 2px solid var(--snow-blue);
+                    border-radius: 999px;
+                    min-height: 40px;
+                }
+                html::-webkit-scrollbar-thumb:hover { background: var(--indigo); }
+                html::-webkit-scrollbar-thumb:active { background: var(--deep-indigo); }
+                html::-webkit-scrollbar-corner { background: var(--snow-blue); }
+            }
+        }
+
         body {
             margin: 0;
             color: var(--ink);
