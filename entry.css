@@ -1,0 +1,84 @@
+.entry-intro {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    color: #f7f8f5;
+    background: radial-gradient(ellipse at 50% 48%, #19324a, #10263a 58%, #0b1a29);
+    animation: EntryVeilDissolve 1600ms ease-in-out both;
+}
+
+.entry-intro[hidden] { display: none; }
+
+.entry-signature {
+    position: relative;
+    padding: 24px;
+    text-align: center;
+    animation: EntrySignatureAppear 1250ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.entry-caption {
+    margin: 0 0 24px;
+    padding-left: .38em;
+    color: #b79a62;
+    font-size: .58rem;
+    letter-spacing: .38em;
+}
+
+.entry-name {
+    margin: 0;
+    padding-left: .16em;
+    font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+    font-size: clamp(2.6rem, 7vw, 4.8rem);
+    font-weight: 400;
+    letter-spacing: .16em;
+    line-height: 1.5;
+}
+
+.entry-name span { margin-left: .4em; }
+
+.entry-romanization {
+    margin: 20px 0 0;
+    padding-left: .32em;
+    color: #e7eff3b3;
+    font-size: .62rem;
+    letter-spacing: .32em;
+}
+
+.entry-snow {
+    position: absolute;
+    inset: -15%;
+    opacity: .5;
+    background:
+        radial-gradient(circle at 22% 24%, #e7eff3b3 0 1px, transparent 2px),
+        radial-gradient(circle at 76% 20%, #e7eff380 0 1.5px, transparent 3px),
+        radial-gradient(circle at 36% 72%, #e7eff399 0 1px, transparent 2px),
+        radial-gradient(circle at 84% 64%, #e7eff399 0 1px, transparent 2px),
+        radial-gradient(circle at 12% 60%, #e7eff366 0 1.5px, transparent 3px),
+        radial-gradient(circle at 62% 82%, #e7eff380 0 1px, transparent 2px);
+    animation: EntrySnowDrift 1600ms ease-out both;
+}
+
+@keyframes EntrySignatureAppear {
+    0% { opacity: 0; transform: translateY(12px); filter: blur(6px); }
+    38%, 76% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    100% { opacity: 0; transform: translateY(-5px); filter: blur(3px); }
+}
+
+@keyframes EntryVeilDissolve {
+    0%, 65% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes EntrySnowDrift {
+    from { opacity: 0; transform: translateY(-12px); }
+    40% { opacity: .5; }
+    to { opacity: 0; transform: translateY(30px); }
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+    .entry-intro { display: none; animation: none; }
+    .entry-signature, .entry-snow { animation: none; }
+}
