@@ -448,6 +448,7 @@
         .project-details dd { margin: 4px 0 0; overflow-wrap: anywhere; }
         .project-screenshot { margin: 24px 0 0; }
         .project-screenshot img { display: block; width: 100%; height: auto; }
+        .project-screenshot video { display: block; width: 100%; height: auto; background: #10263a; }
         .project-screenshot figcaption { margin-top: 8px; color: #60727e; font-size: .85rem; }
 
         .project-card h3 {
@@ -959,6 +960,13 @@
             <div><dt>開発人数</dt><dd>3名</dd></div>
         </dl>
         <figure class="project-screenshot">
+            <video controls playsinline muted preload="none" poster="assets/works/optimal-solution-play-01.png" width="1920" height="1080" aria-label="死因：最適解の紹介動画（音声なし）">
+                <source src="assets/works/optimal-solution-play.mp4" type="video/mp4">
+                <a href="assets/works/optimal-solution-play.mp4">紹介動画を開く（音声なし）</a>
+            </video>
+            <figcaption>紹介動画（音声なし）</figcaption>
+        </figure>
+        <figure class="project-screenshot">
             <img src="assets/works/optimal-solution-play-01.png" alt="死因：最適解のプレイ画面。青いキャラクターとステージ上の仕掛け" width="1920" height="1080" loading="lazy">
             <figcaption>プレイ画面</figcaption>
         </figure>
@@ -1044,6 +1052,12 @@ function CloseProjectDialog() {
     projectDialog.close();
 }
 
+function PauseProjectVideos() {
+    for (let projectVideo of projectDialogDetails.querySelectorAll("video")) {
+        projectVideo.pause();
+    }
+}
+
 function HandleProjectBackdropClick(event) {
     if (event.target !== projectDialog) {
         return;
@@ -1069,6 +1083,7 @@ for (let projectCard of projectCards) {
 }
 projectDialog.querySelector(".project-dialog-close").addEventListener("click", CloseProjectDialog);
 projectDialog.addEventListener("click", HandleProjectBackdropClick);
+projectDialog.addEventListener("close", PauseProjectVideos);
 </script>
 <script>
 "use strict";
