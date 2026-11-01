@@ -441,6 +441,15 @@
             text-align: center;
         }
 
+        .project-image-placeholder img { display: block; width: 100%; height: 100%; object-fit: contain; }
+        .project-details { margin: 20px 0 0; }
+        .project-details > div { padding: 10px 0; border-bottom: 1px solid rgba(25, 50, 74, .13); }
+        .project-details dt { color: var(--indigo); font-weight: 700; }
+        .project-details dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+        .project-screenshot { margin: 24px 0 0; }
+        .project-screenshot img { display: block; width: 100%; height: auto; }
+        .project-screenshot figcaption { margin-top: 8px; color: #60727e; font-size: .85rem; }
+
         .project-card h3 {
             margin: 0 0 3px;
             color: var(--indigo);
@@ -877,11 +886,13 @@
             <span class="section-number">参 / 03</span>
             <h2>制作物<small>Works</small></h2>
             <div class="project-grid" aria-label="制作物一覧">
-                <article class="project-card">
-                    <div class="project-image-placeholder">Image</div>
+                <article class="project-card" data-details-id="optimalSolutionDetails">
+                    <div class="project-image-placeholder">
+                        <img src="assets/works/optimal-solution-title.png" alt="死因：最適解のタイトル画面" width="1920" height="1080" loading="lazy">
+                    </div>
                     <div class="project-card-body">
-                        <h3>作品タイトル</h3>
-                        <p>ジャンル・担当</p>
+                        <h3>死因：最適解</h3>
+                        <p>チーム制作 / 3Dアクション</p>
                     </div>
                 </article>
                 <article class="project-card">
@@ -939,6 +950,20 @@
     </main>
 
 
+    <template id="optimalSolutionDetails">
+        <dl class="project-details">
+            <div><dt>制作形態</dt><dd>チーム制作</dd></div>
+            <div><dt>ジャンル</dt><dd>3Dアクション</dd></div>
+            <div><dt>担当箇所</dt><dd>タイトル・ゲームオーバー・ゲームクリア・ステージセレクト・ゲームエンジン</dd></div>
+            <div><dt>開発期間</dt><dd>10日</dd></div>
+            <div><dt>開発人数</dt><dd>3名</dd></div>
+        </dl>
+        <figure class="project-screenshot">
+            <img src="assets/works/optimal-solution-play-01.png" alt="死因：最適解のプレイ画面。青いキャラクターとステージ上の仕掛け" width="1920" height="1080" loading="lazy">
+            <figcaption>プレイ画面</figcaption>
+        </figure>
+    </template>
+
     <dialog class="project-dialog" id="projectDialog" aria-labelledby="projectDialogTitle" aria-describedby="projectDialogSummary">
         <div class="project-dialog-header">
             <button class="project-dialog-close" type="button" autofocus>閉じる ×</button>
@@ -947,6 +972,7 @@
         <div class="project-dialog-content">
             <h3 id="projectDialogTitle"></h3>
             <p id="projectDialogSummary"></p>
+            <div id="projectDialogDetails"></div>
         </div>
     </dialog>
 
@@ -969,6 +995,7 @@ let projectDialog = document.getElementById("projectDialog");
 let projectDialogImage = document.getElementById("projectDialogImage");
 let projectDialogTitle = document.getElementById("projectDialogTitle");
 let projectDialogSummary = document.getElementById("projectDialogSummary");
+let projectDialogDetails = document.getElementById("projectDialogDetails");
 let projectCards = document.querySelectorAll(".project-card");
 
 function OpenProjectDialog(event) {
@@ -983,6 +1010,14 @@ function OpenProjectDialog(event) {
     }
     projectDialogTitle.textContent = projectCard.querySelector("h3").textContent;
     projectDialogSummary.textContent = projectCard.querySelector("p").textContent;
+    projectDialogDetails.replaceChildren();
+    let detailsId = projectCard.dataset.detailsId;
+    if (detailsId) {
+        let detailsTemplate = document.getElementById(detailsId);
+        if (detailsTemplate) {
+            projectDialogDetails.appendChild(detailsTemplate.content.cloneNode(true));
+        }
+    }
     let cardBounds = projectCard.getBoundingClientRect();
     projectDialog.showModal();
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
